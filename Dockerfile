@@ -1,5 +1,7 @@
-ARG PHP_VERSION
-# Use the official PHP image with Apache (change 8.2 to 8.3 or latest as needed)
+# Default to 8.2 if no argument is provided
+ARG PHP_VERSION=8.2
+
+# Use the variable in the FROM line
 FROM php:${PHP_VERSION}-apache
 
 # 1. Enable mod_rewrite for URL rewriting
