@@ -6,9 +6,9 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  # specific name: github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
-  PHP_VERSION: "8.3"
+  # === CHANGE PHP VERSION HERE ===
+  PHP_VERSION: "8.3" 
 
 jobs:
   build:
@@ -33,8 +33,10 @@ jobs:
         with:
           context: .
           push: true
+          # Pass the version to Docker
           build-args: |
             PHP_VERSION=${{ env.PHP_VERSION }}
-          tags:tags: |
+          # Tag the image with "latest" AND the specific version (e.g., :8.3)
+          tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.PHP_VERSION }}
