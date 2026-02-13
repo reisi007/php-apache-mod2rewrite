@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_BASE: "php-apache"
+  IMAGE_NAME: ${{ github.repository }}
   PHP_VERSION: "8.3"
 
 jobs:
@@ -37,8 +37,8 @@ jobs:
           push: true
           build-args: PHP_VERSION=${{ env.PHP_VERSION }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_BASE }}-mod2rewrite:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_BASE }}-mod2rewrite:${{ env.PHP_VERSION }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.PHP_VERSION }}
 
       - name: Build Full Image
         uses: docker/build-push-action@v4
@@ -48,5 +48,5 @@ jobs:
           push: true
           build-args: PHP_VERSION=${{ env.PHP_VERSION }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_BASE }}-mod2rewrite-imagick-exiftool:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_BASE }}-mod2rewrite-imagick-exiftool:${{ env.PHP_VERSION }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-mod2rewrite-imagick-exiftool:extended
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-mod2rewrite-imagick-exiftool:extended-${{ env.PHP_VERSION }}
