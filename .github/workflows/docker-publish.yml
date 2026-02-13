@@ -9,7 +9,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  PHP_VERSION: "8.3"
+  PHP_VERSIONS: '["8.5", "8.4", "8.3", "8.2"]'
 
 jobs:
   build:
@@ -17,6 +17,9 @@ jobs:
     permissions:
       contents: read
       packages: write
+    strategy:
+      matrix:
+        php: ${{ fromJson(env.PHP_VERSIONS) }}
 
     steps:
       - name: Checkout repository
@@ -35,10 +38,10 @@ jobs:
           context: .
           target: base
           push: true
-          build-args: PHP_VERSION=${{ env.PHP_VERSION }}
+          build-args: PHP_VERSION=${{ matrix.php }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.PHP_VERSION }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.php }}
+            ${{ matrix.php == fromJson(env.PHP_VERSIONS)[0] && format('{0}/{1}:latest', env.REGISTRY, env.IMAGE_NAME) || '' }}
 
       - name: Build Full Image
         uses: docker/build-push-action@v4
@@ -46,7 +49,7 @@ jobs:
           context: .
           target: full
           push: true
-          build-args: PHP_VERSION=${{ env.PHP_VERSION }}
+          build-args: PHP_VERSION=${{ matrix.php }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-imagick-exiftool:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-imagick-exiftool:${{ env.PHP_VERSION }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-imagick-exiftool:${{ matrix.php }}
+            ${{ matrix.php == fromJson(env.PHP_VERSIONS)[0] && format('{0}/{1}-imagick-exiftool:latest', env.REGISTRY, env.IMAGE_NAME) || '' }}
