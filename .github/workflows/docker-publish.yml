@@ -9,17 +9,35 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  # Define the list once here. The first item [0] will be treated as 'latest'.
   PHP_VERSIONS: '["8.5", "8.4", "8.3", "8.2"]'
 
 jobs:
+  # New job to calculate the matrix and latest version dynamically
+  determine-versions:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      latest: ${{ steps.set-matrix.outputs.latest }}
+    steps:
+      - id: set-matrix
+        run: |
+          echo "matrix=${{ env.PHP_VERSIONS }}" >> $GITHUB_OUTPUT
+          # Extracts the first item from the JSON array to use as 'latest'
+          LATEST=$(echo '${{ env.PHP_VERSIONS }}' | jq -r '.[0]')
+          echo "latest=$LATEST" >> $GITHUB_OUTPUT
+
   build:
+    needs: determine-versions # Wait for the setup job
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     strategy:
+      fail-fast: false
       matrix:
-        php: ${{ fromJson(env.PHP_VERSIONS) }}
+        # Use the output from the setup job
+        php: ${{ fromJson(needs.determine-versions.outputs.matrix) }}
 
     steps:
       - name: Checkout repository
@@ -41,7 +59,7 @@ jobs:
           build-args: PHP_VERSION=${{ matrix.php }}
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.php }}
-            ${{ matrix.php == fromJson(env.PHP_VERSIONS)[0] && format('{0}/{1}:latest', env.REGISTRY, env.IMAGE_NAME) || '' }}
+            ${{ matrix.php == needs.determine-versions.outputs.latest && format('{0}/{1}:latest', env.REGISTRY, env.IMAGE_NAME) || '' }}
 
       - name: Build Full Image
         uses: docker/build-push-action@v4
@@ -52,4 +70,4 @@ jobs:
           build-args: PHP_VERSION=${{ matrix.php }}
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-imagick-exiftool:${{ matrix.php }}
-            ${{ matrix.php == fromJson(env.PHP_VERSIONS)[0] && format('{0}/{1}-imagick-exiftool:latest', env.REGISTRY, env.IMAGE_NAME) || '' }}
+            ${{ matrix.php == needs.determine-versions.outputs.latest && format('{0}/{1}-imagick-exiftool:latest', env.REGISTRY, env.IMAGE_NAME) || '' }}
