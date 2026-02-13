@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: Build and Push Docker Images
 
 on:
   push:
@@ -8,9 +8,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-  # === CHANGE PHP VERSION HERE ===
-  PHP_VERSION: "8.3" 
+  IMAGE_BASE: "php-apache"
+  PHP_VERSION: "8.3"
 
 jobs:
   build:
@@ -30,15 +29,24 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build Base Image
         uses: docker/build-push-action@v4
         with:
           context: .
+          target: base
           push: true
-          # Pass the version to Docker
-          build-args: |
-            PHP_VERSION=${{ env.PHP_VERSION }}
-          # Tag the image with "latest" AND the specific version (e.g., :8.3)
+          build-args: PHP_VERSION=${{ env.PHP_VERSION }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.PHP_VERSION }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_BASE }}-mod2rewrite:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_BASE }}-mod2rewrite:${{ env.PHP_VERSION }}
+
+      - name: Build Full Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          target: full
+          push: true
+          build-args: PHP_VERSION=${{ env.PHP_VERSION }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_BASE }}-mod2rewrite-imagick-exiftool:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_BASE }}-mod2rewrite-imagick-exiftool:${{ env.PHP_VERSION }}
