@@ -48,5 +48,5 @@ jobs:
           push: true
           build-args: PHP_VERSION=${{ env.PHP_VERSION }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-mod2rewrite-imagick-exiftool:extended
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-mod2rewrite-imagick-exiftool:extended-${{ env.PHP_VERSION }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-imagick-exiftool:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-imagick-exiftool:${{ env.PHP_VERSION }}
