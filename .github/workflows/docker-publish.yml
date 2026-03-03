@@ -61,6 +61,17 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.php }}
             ${{ matrix.php == needs.determine-versions.outputs.latest && format('{0}/{1}:latest', env.REGISTRY, env.IMAGE_NAME) || '' }}
 
+      - name: Build Base MariaDB PDO Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          target: base-maria-pdo
+          push: true
+          build-args: PHP_VERSION=${{ matrix.php }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-maria-pdo:${{ matrix.php }}
+            ${{ matrix.php == needs.determine-versions.outputs.latest && format('{0}/{1}-maria-pdo:latest', env.REGISTRY, env.IMAGE_NAME) || '' }}
+
       - name: Build Full Image
         uses: docker/build-push-action@v4
         with:
@@ -71,3 +82,14 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-imagick-exiftool:${{ matrix.php }}
             ${{ matrix.php == needs.determine-versions.outputs.latest && format('{0}/{1}-imagick-exiftool:latest', env.REGISTRY, env.IMAGE_NAME) || '' }}
+
+      - name: Build Full MariaDB PDO Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          target: full-maria-pdo
+          push: true
+          build-args: PHP_VERSION=${{ matrix.php }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-imagick-exiftool-maria-pdo:${{ matrix.php }}
+            ${{ matrix.php == needs.determine-versions.outputs.latest && format('{0}/{1}-imagick-exiftool-maria-pdo:latest', env.REGISTRY, env.IMAGE_NAME) || '' }}

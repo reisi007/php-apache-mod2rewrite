@@ -10,6 +10,12 @@ RUN a2enmod rewrite
 WORKDIR /var/www/html
 RUN chown -R www-data:www-data /var/www/html
 
+# --- Stage: Base with MariaDB PDO (-maria-pdo) ---
+FROM base AS base-maria-pdo
+
+# MariaDB/MySQL PDO Treiber installieren
+RUN docker-php-ext-install pdo_mysql
+
 # --- Stage: Full (php-apache-mod2rewrite-imagick-exiftool) ---
 FROM base AS full
 
@@ -28,7 +34,8 @@ RUN apt-get update && apt-get install -y \
     && rm -r /var/lib/apt/lists/*
 
 # PHP Extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp --with-avif \
+RUN docker-php-ext-configure gd --with-freetype \
+    --with-jpeg --with-webp --with-avif \
     && docker-php-ext-install -j$(nproc) gd zip exif
 
 # Imagick
@@ -45,3 +52,9 @@ RUN find /etc -name "policy.xml" -exec sed -i 's/limit memory="256MiB"/limit mem
     && find /etc -name "policy.xml" -exec sed -i 's/limit map="512MiB"/limit map="4GiB"/g' {} + \
     && find /etc -name "policy.xml" -exec sed -i '/<\/policymap>/i \  <policy domain="coder" rights="none" pattern="AVIF" />' {} + \
     && find /etc -name "policy.xml" -exec sed -i '/<\/policymap>/i \  <policy domain="coder" rights="none" pattern="HEIC" />' {} +
+
+# --- Stage: Full with MariaDB PDO (-maria-pdo) ---
+FROM full AS full-maria-pdo
+
+# MariaDB/MySQL PDO Treiber installieren
+RUN docker-php-ext-install pdo_mysql
