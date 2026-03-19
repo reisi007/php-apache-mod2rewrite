@@ -4,8 +4,18 @@ ARG PHP_VERSION=8.3
 # --- Stage: Base (php-apache-mod2rewrite) ---
 FROM php:${PHP_VERSION}-apache AS base
 
-# Apache Mod-Rewrite
-RUN a2enmod rewrite
+# System dependencies for Base (xsendfile)
+RUN apt-get update && apt-get install -y \
+    libapache2-mod-xsendfile \
+    --no-install-recommends \
+    && rm -r /var/lib/apt/lists/*
+
+# Apache Mod-Rewrite & Mod-XSendfile
+RUN a2enmod rewrite xsendfile
+
+# Configure X-Sendfile to allow serving from /var/www (covers /var/www/html and /var/www/photos)
+RUN echo "XSendFile On\nXSendFilePath /var/www" > /etc/apache2/conf-available/xsendfile.conf \
+    && a2enconf xsendfile
 
 WORKDIR /var/www/html
 RUN chown -R www-data:www-data /var/www/html
@@ -19,7 +29,7 @@ RUN docker-php-ext-install pdo_mysql
 # --- Stage: Full (php-apache-mod2rewrite-imagick-exiftool) ---
 FROM base AS full
 
-# System dependencies
+# System dependencies for Media Processing
 RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libjpeg62-turbo-dev \

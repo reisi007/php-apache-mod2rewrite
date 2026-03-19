@@ -1,6 +1,6 @@
-# **PHP Apache ModRewrite Docker Images**
+# **PHP Apache ModRewrite & X-Sendfile Docker Images**
 
-This repository provides optimized Docker images based on the official php:apache image. It is specifically configured for web applications requiring URL rewriting and offers extended variants for image-intensive applications and MariaDB/MySQL database connections.
+This repository provides optimized Docker images based on the official php:apache image. It is specifically configured for web applications requiring URL rewriting and highly efficient file streaming via `mod_xsendfile`. It offers extended variants for image-intensive applications and MariaDB/MySQL database connections.
 
 The images are built automatically via GitHub Actions and published to the GitHub Container Registry (ghcr.io).
 
@@ -8,17 +8,18 @@ The images are built automatically via GitHub Actions and published to the GitHu
 
 There are four main variants tailored to different use cases:
 
-### **1\. Base Image (:latest, :8.x)**
+### **1. Base Image (:latest, :8.x)**
 A lightweight version for standard web applications.
 
 * **Base:** Official php:{version}-apache  
-* **Modules:** mod\_rewrite enabled (for .htaccess support and clean URLs)  
+* **Modules:** * `mod_rewrite` enabled (for .htaccess support and clean URLs)
+  * `mod_xsendfile` enabled (for highly efficient file delivery offloading PHP). The `XSendFilePath` is set to `/var/www`, allowing you to serve files securely from `/var/www/html` or other mounted volumes like `/var/www/photos`.
 * **Permissions:** www-data set as owner for /var/www/html
 
-### **2\. Base Image with MariaDB PDO (-maria-pdo)**
+### **2. Base Image with MariaDB PDO (-maria-pdo)**
 Includes everything from the Base Image, plus the `pdo_mysql` PHP extension for connecting to MariaDB/MySQL databases.
 
-### **3\. Full Image (-imagick-exiftool)**
+### **3. Full Image (-imagick-exiftool)**
 A powerful version for applications with high image processing requirements (e.g., CMS, galleries, asset management).
 
 * **Includes everything from the Base Image** * **System Tools:** exiftool, libmagickwand, various graphics libraries (jpeg, png, webp, avif, heif)  
@@ -28,7 +29,7 @@ A powerful version for applications with high image processing requirements (e.g
   * zip  
 * **Configuration:** Optimized for higher performance and larger uploads.
 
-### **4\. Full Image with MariaDB PDO (-imagick-exiftool-maria-pdo)**
+### **4. Full Image with MariaDB PDO (-imagick-exiftool-maria-pdo)**
 Includes everything from the Full Image, plus the `pdo_mysql` PHP extension.
 
 ## **🏷️ Tags & Versions**
